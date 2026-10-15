@@ -1,0 +1,12 @@
+# Gradle caches and build output
+.gradle/
+.kotlin/
+build/
+
+# Machine-specific settings (SDK path on your PC)
+local.properties
+
+# App signing keys: never commit these
+*.keystore
+*.jks
+
