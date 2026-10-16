@@ -9,7 +9,11 @@ data class RadioSong(
     val path: String,
     val size: Long,
     val song: Song? = null,
-)
+) {
+    val fileName: String
+        get() =
+            path.substringAfterLast("/")
+}
 
 
 @Serializable
