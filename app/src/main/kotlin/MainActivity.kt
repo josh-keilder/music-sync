@@ -1,4 +1,4 @@
-package com.josh.musicsync
+package io.github.joshkeilder.musicsync
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.josh.musicsync.ui.RandomSongScreen
+import io.github.joshkeilder.musicsync.ui.DriveScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Scaffold { padding ->
-                    RandomSongScreen(Modifier.padding(padding))
+                    DriveScreen(Modifier.padding(padding))
                 }
             }
         }

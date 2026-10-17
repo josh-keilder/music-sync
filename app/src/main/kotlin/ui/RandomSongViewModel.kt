@@ -1,4 +1,4 @@
-package com.josh.musicsync.ui
+package io.github.joshkeilder.musicsync.ui
 
 import android.app.Application
 import androidx.compose.runtime.getValue
@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.josh.musicsync.data.JuicewrldApi
-import com.josh.musicsync.data.MusicFolder
-import com.josh.musicsync.data.RadioSong
+import io.github.joshkeilder.musicsync.data.JuicewrldApi
+import io.github.joshkeilder.musicsync.data.MusicFolder
+import io.github.joshkeilder.musicsync.data.RadioSong
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -48,7 +48,6 @@ class RandomSongViewModel(application: Application) : AndroidViewModel(applicati
                 downloadState = if (musicFolder.exists(song.fileName))
                     DownloadState.AlreadyHave else DownloadState.Idle
                 state = RandomSongState.Success(song)
-
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -69,7 +68,6 @@ class RandomSongViewModel(application: Application) : AndroidViewModel(applicati
                 val body = api.downloadSong(song.path)
                 body.use { musicFolder.save(fileName, it.byteStream()) }
                 downloadState = DownloadState.Saved
-
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

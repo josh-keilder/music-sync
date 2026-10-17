@@ -1,4 +1,4 @@
-package com.josh.musicsync.data
+package io.github.joshkeilder.musicsync.data
 
 import android.content.ContentValues
 import android.content.Context
@@ -11,7 +11,6 @@ import kotlinx.coroutines.withContext
 private const val SONGS_FOLDER = "Music/Songs/"
 
 class MusicFolder(private val context: Context) {
-
     suspend fun save(fileName: String, input: InputStream): Uri = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
         val values = ContentValues().apply {
@@ -46,5 +45,4 @@ class MusicFolder(private val context: Context) {
         context.contentResolver.query(collection, projection, selection, selectionArgs, null)
             ?.use { cursor -> cursor.count > 0 } ?: false
     }
-
 }

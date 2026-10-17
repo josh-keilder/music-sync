@@ -1,4 +1,4 @@
-package com.josh.musicsync.ui
+package io.github.joshkeilder.musicsync.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
-import com.josh.musicsync.data.RadioSong
+import io.github.joshkeilder.musicsync.data.RadioSong
 
 @Composable
 fun RandomSongScreen(
@@ -64,8 +64,6 @@ fun RandomSongScreen(
             permissionLauncher.launch(Manifest.permission.READ_MEDIA_AUDIO)
         }
     }
-
-
 
     Column(
         modifier = modifier.fillMaxSize().padding(24.dp),
@@ -97,7 +95,6 @@ fun RandomSongScreen(
     }
 }
 
-
 @Composable
 fun SongCard(radioSong: RadioSong, downloadState: DownloadState, onDownloadClick: () -> Unit) {
     val song = radioSong.song
@@ -123,8 +120,6 @@ fun SongCard(radioSong: RadioSong, downloadState: DownloadState, onDownloadClick
                         .padding(12.dp),
                 )
             }
-
-
         }
 
         Column(

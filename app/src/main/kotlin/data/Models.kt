@@ -1,4 +1,4 @@
-package com.josh.musicsync.data
+package io.github.joshkeilder.musicsync.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -11,10 +11,8 @@ data class RadioSong(
     val song: Song? = null,
 ) {
     val fileName: String
-        get() =
-            path.substringAfterLast("/")
+        get() = path.substringAfterLast("/")
 }
-
 
 @Serializable
 data class Song(
@@ -25,7 +23,7 @@ data class Song(
     @SerialName("credited_artists") val creditedArtists: String = "",
     val producers: String = "",
     val length: String = "",
-    @SerialName("image_url") val imageUrl: String = ""
+    @SerialName("image_url") val imageUrl: String = "",
 ) {
     val fullImageUrl: String?
         get() = when {

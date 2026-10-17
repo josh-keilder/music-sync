@@ -1,4 +1,4 @@
-package com.josh.musicsync.data
+package io.github.joshkeilder.musicsync.data
 
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -12,14 +12,12 @@ import retrofit2.http.Query
 import retrofit2.http.Streaming
 
 interface JuicewrldApi {
-
     @GET("radio/random/")
     suspend fun randomSong(): RadioSong
 
     @Streaming
     @GET("files/download/")
     suspend fun downloadSong(@Query("path") path: String): ResponseBody
-
 
     companion object {
         private const val BASE_URL = "https://juicewrldapi.com/juicewrld/"

@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.josh.musicsync"
+    namespace = "io.github.joshkeilder.musicsync"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.josh.musicsync"
+        applicationId = "io.github.joshkeilder.musicsync"
         minSdk = 33
         targetSdk = 36
         versionCode = 1
@@ -39,4 +39,6 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.play.services.auth)
+    implementation(libs.kotlinx.coroutines.play.services)
 }
