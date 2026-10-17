@@ -41,4 +41,5 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.play.services.auth)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.navigation.compose)
 }

@@ -1,6 +1,6 @@
 @file:Suppress("FunctionName")
 
-package io.github.joshkeilder.musicsync.ui.random
+package io.github.joshkeilder.musicsync.ui.randomsong
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -60,7 +60,7 @@ fun RandomSongScreen(
     LaunchedEffect(Unit) {
         val alreadyGranted = ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.READ_MEDIA_AUDIO
+            Manifest.permission.READ_MEDIA_AUDIO,
         ) == PackageManager.PERMISSION_GRANTED
         if (!alreadyGranted) {
             permissionLauncher.launch(Manifest.permission.READ_MEDIA_AUDIO)
@@ -138,7 +138,7 @@ fun SongCard(radioSong: RadioSong, downloadState: DownloadState, onDownloadClick
                 song.era?.let {
                     if (it.timeFrame.isNotBlank()) InfoRow(
                         Icons.Outlined.CalendarMonth,
-                        "Time Frame: ${it.timeFrame}"
+                        "Time Frame: ${it.timeFrame}",
                     )
                 }
                 if (song.creditedArtists.isNotBlank()) InfoRow(Icons.Outlined.Person, song.creditedArtists)
@@ -157,7 +157,7 @@ fun SongCard(radioSong: RadioSong, downloadState: DownloadState, onDownloadClick
             Button(
                 onClick = onDownloadClick,
                 enabled = downloadState is DownloadState.Idle || downloadState is DownloadState.Failed,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(label)
             }

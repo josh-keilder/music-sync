@@ -1,4 +1,4 @@
-package io.github.joshkeilder.musicsync.data.drive
+package io.github.joshkeilder.musicsync.data.googledrive
 
 import android.content.Context
 import android.content.Intent
@@ -8,12 +8,12 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.Scope
 import kotlinx.coroutines.tasks.await
 
-private const val DRIVE_READONLY_SCOPE = "https://www.googleapis.com/auth/drive.readonly"
+private const val GOOGLE_DRIVE_READONLY_SCOPE = "https://www.googleapis.com/auth/drive.readonly"
 
-class DriveAuth(context: Context) {
+class GoogleDriveAuth(context: Context) {
     private val client = Identity.getAuthorizationClient(context)
     private val request = AuthorizationRequest.builder()
-        .setRequestedScopes(listOf(Scope(DRIVE_READONLY_SCOPE)))
+        .setRequestedScopes(listOf(Scope(GOOGLE_DRIVE_READONLY_SCOPE)))
         .build()
 
     suspend fun authorize(): AuthorizationResult {

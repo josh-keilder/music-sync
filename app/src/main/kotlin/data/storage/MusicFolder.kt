@@ -14,7 +14,7 @@ class MusicFolder(private val context: Context) {
     suspend fun save(fileName: String, input: InputStream): Uri = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
         val values = ContentValues().apply {
-            put(MediaStore.Audio.Media.DISPLAY_NAME, fileName)
+            put(MediaStore.Audio.Media.DISPLAY_NAME, deviceSafeFileName(fileName))
             put(MediaStore.Audio.Media.MIME_TYPE, "audio/mpeg")
             put(MediaStore.Audio.Media.RELATIVE_PATH, SONGS_FOLDER)
             put(MediaStore.Audio.Media.IS_PENDING, 1)
@@ -40,9 +40,11 @@ class MusicFolder(private val context: Context) {
         val collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
         val projection = arrayOf(MediaStore.Audio.Media._ID)
         val selection = "${MediaStore.Audio.Media.DISPLAY_NAME} = ? AND ${MediaStore.Audio.Media.RELATIVE_PATH} = ?"
-        val selectionArgs = arrayOf(fileName, SONGS_FOLDER)
+        val selectionArgs = arrayOf(deviceSafeFileName(fileName), SONGS_FOLDER)
 
         context.contentResolver.query(collection, projection, selection, selectionArgs, null)
             ?.use { cursor -> cursor.count > 0 } ?: false
     }
+
+    private fun deviceSafeFileName(name: String): String = name.replace(Regex("""["*/:<>?\\|]"""), "_")
 }

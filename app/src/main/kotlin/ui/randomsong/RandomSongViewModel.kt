@@ -1,4 +1,4 @@
-package io.github.joshkeilder.musicsync.ui.random
+package io.github.joshkeilder.musicsync.ui.randomsong
 
 import android.app.Application
 import androidx.compose.runtime.getValue
@@ -28,7 +28,7 @@ sealed interface DownloadState {
 }
 
 class RandomSongViewModel(application: Application) : AndroidViewModel(application) {
-    private val api = JuicewrldApi.create()
+    private val juicewrldApi = JuicewrldApi.create()
 
     private val musicFolder = MusicFolder(application)
 
@@ -44,7 +44,7 @@ class RandomSongViewModel(application: Application) : AndroidViewModel(applicati
 
         viewModelScope.launch {
             try {
-                val song = api.randomSong()
+                val song = juicewrldApi.randomSong()
                 downloadState = if (musicFolder.exists(song.fileName))
                     DownloadState.AlreadyHave else DownloadState.Idle
                 state = RandomSongState.Success(song)
@@ -65,7 +65,7 @@ class RandomSongViewModel(application: Application) : AndroidViewModel(applicati
 
         viewModelScope.launch {
             try {
-                val body = api.downloadSong(song.path)
+                val body = juicewrldApi.downloadSong(song.path)
                 body.use { musicFolder.save(fileName, it.byteStream()) }
                 downloadState = DownloadState.Saved
             } catch (e: CancellationException) {
