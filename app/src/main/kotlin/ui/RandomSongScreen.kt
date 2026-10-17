@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName")
+
 package io.github.joshkeilder.musicsync.ui
 
 import android.Manifest

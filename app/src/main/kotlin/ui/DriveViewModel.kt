@@ -28,10 +28,10 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     private fun handleResult(result: AuthorizationResult) {
-        if (result.hasResolution()) {
-            driveState = DriveState.NeedsConsent(result.pendingIntent ?: error("No consent screen returned"))
+        driveState = if (result.hasResolution()) {
+            DriveState.NeedsConsent(result.pendingIntent ?: error("No consent screen returned"))
         } else {
-            driveState = DriveState.SignedIn(result.accessToken ?: error("No access token returned"))
+            DriveState.SignedIn(result.accessToken ?: error("No access token returned"))
         }
     }
 
