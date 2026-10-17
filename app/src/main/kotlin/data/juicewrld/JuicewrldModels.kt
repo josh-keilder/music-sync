@@ -1,4 +1,4 @@
-package io.github.joshkeilder.musicsync.data
+package io.github.joshkeilder.musicsync.data.juicewrld
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

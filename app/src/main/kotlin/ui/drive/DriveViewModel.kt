@@ -1,4 +1,4 @@
-package io.github.joshkeilder.musicsync.ui
+package io.github.joshkeilder.musicsync.ui.drive
 
 import android.app.Application
 import android.app.PendingIntent
@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.identity.AuthorizationResult
-import io.github.joshkeilder.musicsync.data.DriveAuth
+import io.github.joshkeilder.musicsync.data.drive.DriveAuth
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 

@@ -1,6 +1,6 @@
 @file:Suppress("FunctionName")
 
-package io.github.joshkeilder.musicsync.ui
+package io.github.joshkeilder.musicsync.ui.drive
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest

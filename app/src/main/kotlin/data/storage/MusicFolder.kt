@@ -1,4 +1,4 @@
-package io.github.joshkeilder.musicsync.data
+package io.github.joshkeilder.musicsync.data.storage
 
 import android.content.ContentValues
 import android.content.Context

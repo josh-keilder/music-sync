@@ -1,4 +1,4 @@
-package io.github.joshkeilder.musicsync.ui
+package io.github.joshkeilder.musicsync.ui.random
 
 import android.app.Application
 import androidx.compose.runtime.getValue
@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.joshkeilder.musicsync.data.JuicewrldApi
-import io.github.joshkeilder.musicsync.data.MusicFolder
-import io.github.joshkeilder.musicsync.data.RadioSong
+import io.github.joshkeilder.musicsync.data.juicewrld.JuicewrldApi
+import io.github.joshkeilder.musicsync.data.juicewrld.RadioSong
+import io.github.joshkeilder.musicsync.data.storage.MusicFolder
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 

@@ -1,6 +1,6 @@
 @file:Suppress("FunctionName")
 
-package io.github.joshkeilder.musicsync.ui
+package io.github.joshkeilder.musicsync.ui.random
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
-import io.github.joshkeilder.musicsync.data.RadioSong
+import io.github.joshkeilder.musicsync.data.juicewrld.RadioSong
 
 @Composable
 fun RandomSongScreen(

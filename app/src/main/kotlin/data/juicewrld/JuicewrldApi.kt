@@ -1,4 +1,4 @@
-package io.github.joshkeilder.musicsync.data
+package io.github.joshkeilder.musicsync.data.juicewrld
 
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
