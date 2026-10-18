@@ -3,12 +3,15 @@ package io.github.joshkeilder.musicsync.data.googledrive
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Streaming
 
 interface GoogleDriveApi {
     @GET("files")
@@ -19,6 +22,14 @@ interface GoogleDriveApi {
         @Query("pageSize") pageSize: Int = 1000,
         @Query("pageToken") pageToken: String? = null,
     ): GoogleDriveFileList
+
+    @Streaming
+    @GET("files/{fileId}")
+    suspend fun downloadFile(
+        @Header("Authorization") authorization: String,
+        @Path("fileId") fileId: String,
+        @Query("alt") alt: String = "media",
+    ): ResponseBody
 
     companion object {
         private const val BASE_URL = "https://www.googleapis.com/drive/v3/"

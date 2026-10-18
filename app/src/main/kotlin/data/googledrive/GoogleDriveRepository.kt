@@ -1,9 +1,12 @@
 package io.github.joshkeilder.musicsync.data.googledrive
 
-import androidx.compose.ui.derivedMediaQuery
+import okhttp3.ResponseBody
 
 class GoogleDriveRepository {
     private val googleDriveApi = GoogleDriveApi.create()
+
+    var cachedGoogleDriveSongs: List<GoogleDriveFile>? = null
+        private set
 
     suspend fun findSongsFolderId(accessToken: String): String? {
         val result = googleDriveApi.listFiles(
@@ -28,6 +31,13 @@ class GoogleDriveRepository {
             pageToken = page.nextPageToken
         } while (pageToken != null)
 
+        cachedGoogleDriveSongs = songs
         return songs
     }
+
+    suspend fun downloadSong(accessToken: String, song: GoogleDriveFile): ResponseBody =
+        googleDriveApi.downloadFile(
+            authorization = "Bearer $accessToken",
+            fileId = song.id,
+        )
 }

@@ -6,9 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.joshkeilder.musicsync.data.juicewrld.JuicewrldApi
+import io.github.joshkeilder.musicsync.MusicSyncApplication
 import io.github.joshkeilder.musicsync.data.juicewrld.RadioSong
-import io.github.joshkeilder.musicsync.data.storage.MusicFolder
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -28,9 +27,9 @@ sealed interface DownloadState {
 }
 
 class RandomSongViewModel(application: Application) : AndroidViewModel(application) {
-    private val juicewrldApi = JuicewrldApi.create()
-
-    private val musicFolder = MusicFolder(application)
+    private val musicSyncAppContainer = (application as MusicSyncApplication).musicSyncAppContainer
+    private val juicewrldApi = musicSyncAppContainer.juicewrldApi
+    private val musicFolder = musicSyncAppContainer.musicFolder
 
     var state: RandomSongState by mutableStateOf(RandomSongState.Idle)
         private set
