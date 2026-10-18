@@ -11,8 +11,20 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.identity.AuthorizationResult
 import io.github.joshkeilder.musicsync.MusicSyncApplication
 import io.github.joshkeilder.musicsync.data.googledrive.GoogleDriveFile
+import io.github.joshkeilder.musicsync.data.storage.DeviceSong
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
+
+data class GoogleDriveSyncSong(
+    val name: String,
+    val googleDriveFile: GoogleDriveFile?,
+    val deviceSong: DeviceSong?,
+) {
+    val isOnGoogleDrive: Boolean
+        get() = googleDriveFile != null
+    val isOnDevice: Boolean
+        get() = deviceSong != null
+}
 
 sealed interface GoogleDriveSyncState {
     data object SignedOut : GoogleDriveSyncState
@@ -20,12 +32,13 @@ sealed interface GoogleDriveSyncState {
     data object FolderNotFound : GoogleDriveSyncState
     data class NeedsConsent(val intent: PendingIntent) : GoogleDriveSyncState
     data class Loaded(
-        val songs: List<GoogleDriveFile>,
-        val missingSongNames: Set<String>,
+        val syncSongs: List<GoogleDriveSyncSong>,
         val isRefreshing: Boolean = false,
     ) : GoogleDriveSyncState {
-        val missingCount: Int
-            get() = missingSongNames.size
+        val notOnDeviceSongs: List<GoogleDriveSyncSong>
+            get() = syncSongs.filter { !it.isOnDevice }
+        val notOnGoogleDriveSongs: List<GoogleDriveSyncSong>
+            get() = syncSongs.filter { !it.isOnGoogleDrive }
     }
 
     data class Error(val message: String) : GoogleDriveSyncState
@@ -35,6 +48,12 @@ sealed interface GoogleDriveDownloadState {
     data object Idle : GoogleDriveDownloadState
     data class Downloading(val current: Int, val total: Int, val songName: String) : GoogleDriveDownloadState
     data class Finished(val downloadedCount: Int, val failedCount: Int) : GoogleDriveDownloadState
+}
+
+sealed interface GoogleDriveUploadState {
+    data object Idle : GoogleDriveUploadState
+    data class Uploading(val current: Int, val total: Int, val songName: String) : GoogleDriveUploadState
+    data class Finished(val uploadedCount: Int, val failedCount: Int) : GoogleDriveUploadState
 }
 
 class GoogleDriveSyncViewModel(application: Application) : AndroidViewModel(application) {
@@ -47,6 +66,9 @@ class GoogleDriveSyncViewModel(application: Application) : AndroidViewModel(appl
         private set
 
     var googleDriveDownloadState: GoogleDriveDownloadState by mutableStateOf(GoogleDriveDownloadState.Idle)
+        private set
+
+    var googleDriveUploadState: GoogleDriveUploadState by mutableStateOf(GoogleDriveUploadState.Idle)
         private set
 
     init {
@@ -124,13 +146,29 @@ class GoogleDriveSyncViewModel(application: Application) : AndroidViewModel(appl
     }
 
     private suspend fun buildLoadedState(
-        songs: List<GoogleDriveFile>,
+        googleDriveSongs: List<GoogleDriveFile>,
         isRefreshing: Boolean,
     ): GoogleDriveSyncState.Loaded {
-        val sortedSongs = songs.sortedBy { it.name.lowercase() }
-        val missingSongNames = sortedSongs.filter { !musicFolder.exists(it.name) }.map { it.name }.toSet()
+        val deviceSongs = musicFolder.listSongs()
+        val deviceSongsByName = deviceSongs.associateBy { it.name }
+        val matchedDeviceNames = mutableSetOf<String>()
 
-        return GoogleDriveSyncState.Loaded(sortedSongs, missingSongNames, isRefreshing)
+        val songsFromGoogleDrive = googleDriveSongs.map { googleDriveFile ->
+            val deviceName = musicFolder.deviceSafeFileName(googleDriveFile.name)
+            val deviceSong = deviceSongsByName[deviceName]
+            if (deviceSong != null) {
+                matchedDeviceNames += deviceName
+            }
+            GoogleDriveSyncSong(name = googleDriveFile.name, googleDriveFile = googleDriveFile, deviceSong = deviceSong)
+        }
+
+        val songsOnlyOnDevice = deviceSongs
+            .filter { it.name !in matchedDeviceNames }
+            .map { GoogleDriveSyncSong(name = it.name, googleDriveFile = null, deviceSong = it) }
+
+        val syncSongs = (songsFromGoogleDrive + songsOnlyOnDevice).sortedBy { it.name.lowercase() }
+
+        return GoogleDriveSyncState.Loaded(syncSongs, isRefreshing)
     }
 
     private fun showWorking() {
@@ -146,7 +184,7 @@ class GoogleDriveSyncViewModel(application: Application) : AndroidViewModel(appl
     fun downloadMissingSongs() {
         val loaded = googleDriveSyncState as? GoogleDriveSyncState.Loaded ?: return
 
-        val songsToDownload = loaded.songs.filter { it.name in loaded.missingSongNames }
+        val songsToDownload = loaded.notOnDeviceSongs.mapNotNull { it.googleDriveFile }
 
         if (songsToDownload.isEmpty()) {
             return
@@ -162,14 +200,27 @@ class GoogleDriveSyncViewModel(application: Application) : AndroidViewModel(appl
                         GoogleDriveDownloadState.Downloading(index + 1, songsToDownload.size, song.name)
 
                     try {
-                        googleDriveRepository.downloadSong(accessToken, song).use {
+                        val savedUri = googleDriveRepository.downloadSong(accessToken, song).use {
                             musicFolder.save(song.name, it.byteStream())
                         }
+                        val downloadedDeviceSong = DeviceSong(
+                            name = musicFolder.deviceSafeFileName(song.name),
+                            uri = savedUri,
+                            sizeBytes = song.sizeBytes ?: 0,
+                        )
 
                         val current = googleDriveSyncState as? GoogleDriveSyncState.Loaded
 
                         if (current != null) {
-                            googleDriveSyncState = current.copy(missingSongNames = current.missingSongNames - song.name)
+                            googleDriveSyncState = current.copy(
+                                syncSongs = current.syncSongs.map { syncSong ->
+                                    if (syncSong.googleDriveFile?.id == song.id) {
+                                        syncSong.copy(deviceSong = downloadedDeviceSong)
+                                    } else {
+                                        syncSong
+                                    }
+                                },
+                            )
                         }
                     } catch (e: CancellationException) {
                         throw e
@@ -185,6 +236,72 @@ class GoogleDriveSyncViewModel(application: Application) : AndroidViewModel(appl
             } catch (e: Exception) {
                 googleDriveSyncState = GoogleDriveSyncState.Error(e.message ?: "Couldn't download your songs")
             }
+        }
+    }
+
+    fun uploadMissingSongs() {
+        val loaded = googleDriveSyncState as? GoogleDriveSyncState.Loaded ?: return
+
+        val songsToUpload = loaded.notOnGoogleDriveSongs.mapNotNull { it.deviceSong }
+
+        if (songsToUpload.isEmpty()) {
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val accessToken = freshGoogleDriveAccessToken()
+                val folderId = googleDriveRepository.findSongsFolderId(accessToken)
+                    ?: error("Couldn't find your Songs folder on Google Drive")
+
+                var failedCount = 0
+
+                songsToUpload.forEachIndexed { index, deviceSong ->
+                    googleDriveUploadState =
+                        GoogleDriveUploadState.Uploading(index + 1, songsToUpload.size, deviceSong.name)
+
+                    try {
+                        val uploadedGoogleDriveFile =
+                            googleDriveRepository.uploadSong(accessToken, folderId, deviceSong) {
+                                musicFolder.openSong(deviceSong)
+                            }
+
+                        val current = googleDriveSyncState as? GoogleDriveSyncState.Loaded
+
+                        if (current != null) {
+                            googleDriveSyncState = current.copy(
+                                syncSongs = current.syncSongs.map { syncSong ->
+                                    if (syncSong.deviceSong?.uri == deviceSong.uri) {
+                                        syncSong.copy(googleDriveFile = uploadedGoogleDriveFile)
+                                    } else {
+                                        syncSong
+                                    }
+                                },
+                            )
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        failedCount++
+                    }
+                }
+
+                googleDriveUploadState =
+                    GoogleDriveUploadState.Finished(songsToUpload.size - failedCount, failedCount)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                googleDriveSyncState = GoogleDriveSyncState.Error(e.message ?: "Couldn't upload your songs")
+            }
+        }
+    }
+
+    fun clearFinishedTransferMessages() {
+        if (googleDriveDownloadState is GoogleDriveDownloadState.Finished) {
+            googleDriveDownloadState = GoogleDriveDownloadState.Idle
+        }
+        if (googleDriveUploadState is GoogleDriveUploadState.Finished) {
+            googleDriveUploadState = GoogleDriveUploadState.Idle
         }
     }
 

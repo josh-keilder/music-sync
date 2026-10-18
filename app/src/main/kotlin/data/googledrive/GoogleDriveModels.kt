@@ -18,3 +18,9 @@ data class GoogleDriveFileList(
     val files: List<GoogleDriveFile> = emptyList(),
     val nextPageToken: String? = null,
 )
+
+@Serializable
+data class GoogleDriveUploadMetadata(
+    val name: String,
+    val parents: List<String>,
+)
